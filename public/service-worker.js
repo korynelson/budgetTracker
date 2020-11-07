@@ -23,36 +23,37 @@ self.addEventListener("install", function (evt) {
   self.skipWaiting();
 });
 
-// activate
-self.addEventListener("activate", function(evt) {
-  evt.waitUntil(
-    caches.keys().then(keyList => {
-      return Promise.all(
-        keyList.map(key => {
-          if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
-            console.log("Removing old cache data", key);
-            return caches.delete(key);
-          }
-        })
-      );
-    })
-  );
+//activate
+// self.addEventListener("activate", function(evt) {
+//   evt.waitUntil(
+//     caches.keys().then(keyList => {
+//       return Promise.all(
+//         keyList.map(key => {
+//           if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
+//             console.log("Removing old cache data", key);
+//             return caches.delete(key);
+//           }
+//         })
+//       );
+//     })
+//   );
 
-  self.clients.claim();
-});
+//   self.clients.claim();
+// });
 
 // fetch
 self.addEventListener("fetch", function(evt) {
-  if (evt.request.url.includes("/api/")) {
+    console.log('fetch reached')
+  if (evt.request.url.includes("/api/transaction/bulk") || evt.request.url.includes("/api/transaction")) {
+      console.log('if statement reaced')
     evt.respondWith(
       caches.open(DATA_CACHE_NAME).then(cache => {
+          
         return fetch(evt.request)
           .then(response => {
             // If the response was good, clone it and store it in the cache.
-            if (response.status === 200) {
-              cache.put(evt.request.url, response.clone());
-            }
-
+            console.log('cache response')
+              cache.add(evt.request.url, response.clone());
             return response;
           })
           .catch(err => {
@@ -63,8 +64,8 @@ self.addEventListener("fetch", function(evt) {
     );
 
     return;
-  }
-
+  }else{
+    console.log('else statement')
   evt.respondWith(
     caches.open(CACHE_NAME).then(cache => {
       return cache.match(evt.request).then(response => {
@@ -72,4 +73,5 @@ self.addEventListener("fetch", function(evt) {
       });
     })
   );
+}
 });
