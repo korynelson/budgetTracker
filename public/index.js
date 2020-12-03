@@ -142,11 +142,82 @@ function sendTransaction(isAdding) {
     nameEl.value = "";
     amountEl.value = "";
   });
+
+ 
+
 }
 
-function saveRecord(transaction) {
-    console.log(transaction);
+function saveRecord(budgetItem) {
+    // create my indexed DB 
+    open_db(budgetItem);
+
+    // save the transaction
+      console.log(budgetItem);
+
+    // probably have a seperate file for db
+    // Add window listener for online
+    // check if indexed DB has anything in it
+    // when back online try to resend transactions
+    // then clear indexed DB
+
 };
+
+function backOnline(){
+
+}
+
+function open_db(budgetItem) {
+
+  const request = window.indexedDB.open('offline-transactions',2)
+  console.log("opening db")
+    request.onerror = function(event) {
+      console.log('problem opening db')
+    }
+    request.onupgradeneeded = function(event) {
+      db = event.target.result;
+      const store = db.createObjectStore("offline-spending", {keyPath: "date"})
+      store.transaction.oncomplete = function() {
+        console.log('transaction successfully complete')
+      }
+    }
+    request.onsuccess = function(event){
+      console.log("successfully opened db")
+      db = event.target.result;
+      insert_record(budgetItem)
+    }
+
+}
+
+function delete_db(){
+  const request = window.indexedDB.deleteDatabase('offline-transactions');
+  request.onsuccess = function () {
+    console.log('db deleted')
+  }
+}
+
+//delete_db();
+function insert_record(budgetItem){
+  console.log('inserting record')
+  if(db){
+    console.log('found the db')
+    const new_budgetItem = db.transaction(["offline-spending"], "readwrite");
+    const store = new_budgetItem.objectStore("offline-spending");
+    console.log(budgetItem)
+    let request = store.add(budgetItem);
+      request.onerror = function (event){
+        console.log("couldnt add transaction")
+      }
+      request.onsuccess = function () {
+        console.log("success")
+      }
+  }else{
+    console.log("no db")
+  }
+}
+
+function get_record(){
+
+}
 
 document.querySelector("#add-btn").onclick = function() {
   sendTransaction(true);
@@ -155,3 +226,7 @@ document.querySelector("#add-btn").onclick = function() {
 document.querySelector("#sub-btn").onclick = function() {
   sendTransaction(false);
 };
+
+window.addEventListener('online', (event) => {
+  console.log("You are now connected to the network.");
+});
