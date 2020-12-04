@@ -149,23 +149,12 @@ function sendTransaction(isAdding) {
 }
 
 function saveRecord(budgetItem) {
-    // create my indexed DB 
     open_db(budgetItem);
-
-    // save the transaction
-      console.log(budgetItem);
-
-    // probably have a seperate file for db
-    // Add window listener for online
-    // check if indexed DB has anything in it
-    // when back online try to resend transactions
-    // then clear indexed DB
 
 };
 
 async function backOnline(){
   const offlineRecords = await get_record();
-  console.log(offlineRecords);
 
       // also send to server
       fetch("/api/transaction/bulk", {
@@ -183,7 +172,6 @@ async function backOnline(){
           console.log("data errors");
         }
         else {
-          console.log('complete');
         }
       }).catch(err => {
         // fetch failed, so save in indexed db
@@ -197,7 +185,6 @@ async function backOnline(){
 function open_db(budgetItem) {
 
   const request = window.indexedDB.open('offline-transactions',2)
-  console.log("opening db")
     request.onerror = function(event) {
       console.log('problem opening db')
     }
@@ -205,11 +192,9 @@ function open_db(budgetItem) {
       db = event.target.result;
       const store = db.createObjectStore("offline-spending", {keyPath: "date"})
       store.transaction.oncomplete = function() {
-        console.log('transaction successfully complete')
       }
     }
     request.onsuccess = function(event){
-      console.log("successfully opened db")
       db = event.target.result;
       insert_record(budgetItem)
     }
@@ -219,32 +204,25 @@ function open_db(budgetItem) {
 function delete_db(){
   const request = window.indexedDB.deleteDatabase('offline-transactions');
   request.onsuccess = function () {
-    console.log('db deleted')
   }
 }
 
 function insert_record(budgetItem){
-  console.log('inserting record')
   if(db){
-    console.log('found the db')
     const new_budgetItem = db.transaction(["offline-spending"], "readwrite");
     const store = new_budgetItem.objectStore("offline-spending");
-    console.log(budgetItem)
     let request = store.add(budgetItem);
       request.onerror = function (event){
         console.log("couldnt add transaction")
       }
       request.onsuccess = function () {
-        console.log("success")
       }
   }else{
-    console.log("no db")
   }
 }
 
 function get_record(){
   return new Promise(resolve => {
-    console.log('found the db')
     const get_budgetItems = db.transaction(["offline-spending"], "readonly");
     const store = get_budgetItems.objectStore("offline-spending");
 
@@ -254,8 +232,7 @@ function get_record(){
         console.log("couldnt add transaction")
       }
       request.onsuccess = function () {
-        console.log("success")
-        console.log(request.result)
+
         resolve(request.result);
       }
   })

@@ -1,5 +1,3 @@
-//console.log("Hello from service worker!")
-
 const CACHE_NAME = "static-cache-v1";
 const DATA_CACHE_NAME = "data-cache-v1";
 const FILES_TO_CACHE = [
@@ -43,19 +41,14 @@ self.addEventListener("activate", function(evt) {
 
 // fetch
 self.addEventListener("fetch", function(evt) {
-  console.log(evt)
-    console.log('fetch reached')
+
   if (evt.request.url.includes("/api/transaction/bulk") || evt.request.url.includes("/api/transaction")) {
-      console.log('if statement reaced')
     evt.respondWith(
       caches.open(DATA_CACHE_NAME).then(cache => {
           
         return fetch(evt.request)
           .then(response => {
             // If the response was good, clone it and store it in the cache.
-            console.log('cache response')
-            console.log(evt.request.url)
-            console.log(response)
               //cache.add(evt.request.url, response.clone());
             return response;
           })
@@ -68,7 +61,6 @@ self.addEventListener("fetch", function(evt) {
 
     return;
   }else{
-    console.log('else statement')
   evt.respondWith(
     caches.open(CACHE_NAME).then(cache => {
       return cache.match(evt.request).then(response => {
