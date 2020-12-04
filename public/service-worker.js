@@ -43,6 +43,7 @@ self.addEventListener("activate", function(evt) {
 
 // fetch
 self.addEventListener("fetch", function(evt) {
+  console.log(evt)
     console.log('fetch reached')
   if (evt.request.url.includes("/api/transaction/bulk") || evt.request.url.includes("/api/transaction")) {
       console.log('if statement reaced')
@@ -53,7 +54,9 @@ self.addEventListener("fetch", function(evt) {
           .then(response => {
             // If the response was good, clone it and store it in the cache.
             console.log('cache response')
-              cache.add(evt.request.url, response.clone());
+            console.log(evt.request.url)
+            console.log(response)
+              //cache.add(evt.request.url, response.clone());
             return response;
           })
           .catch(err => {

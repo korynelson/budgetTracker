@@ -1,3 +1,4 @@
+
 let transactions = [];
 let myChart;
 
@@ -162,7 +163,34 @@ function saveRecord(budgetItem) {
 
 };
 
-function backOnline(){
+async function backOnline(){
+  const offlineRecords = await get_record();
+  console.log(offlineRecords);
+
+      // also send to server
+      fetch("/api/transaction/bulk", {
+        method: "POST",
+        body: JSON.stringify(offlineRecords),
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => {    
+        return response.json();
+      }).then(data => {
+        if (data.errors) {
+          console.log("data errors");
+        }
+        else {
+          console.log('complete');
+        }
+      }).catch(err => {
+        // fetch failed, so save in indexed db
+          console.log(err)
+      });
+
+  delete_db()
 
 }
 
@@ -195,7 +223,6 @@ function delete_db(){
   }
 }
 
-//delete_db();
 function insert_record(budgetItem){
   console.log('inserting record')
   if(db){
@@ -216,6 +243,22 @@ function insert_record(budgetItem){
 }
 
 function get_record(){
+  return new Promise(resolve => {
+    console.log('found the db')
+    const get_budgetItems = db.transaction(["offline-spending"], "readonly");
+    const store = get_budgetItems.objectStore("offline-spending");
+
+    let request = store.getAll();
+
+      request.onerror = function (event){
+        console.log("couldnt add transaction")
+      }
+      request.onsuccess = function () {
+        console.log("success")
+        console.log(request.result)
+        resolve(request.result);
+      }
+  })
 
 }
 
@@ -228,5 +271,5 @@ document.querySelector("#sub-btn").onclick = function() {
 };
 
 window.addEventListener('online', (event) => {
-  console.log("You are now connected to the network.");
+  backOnline();
 });
