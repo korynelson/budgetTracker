@@ -21,6 +21,8 @@ Clone this repository and run command "npm install" to get dependencies
 ## Usage
 ### To run locally
 Enter the command "npm start" to start application and navigate to localhost:8080 in your browser
+
+*this assumes you have a MongoDB environment already configured.
 ### Use on Heroku
 [Heroku Application](https://korys-budget-app.herokuapp.com/)
 
